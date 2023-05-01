@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    implementation 'com.google.code.gson:gson:2.10.1'
+}
+
+task customFatJar(type: Jar) {
+        archiveFileName = "myname.jar"
+    manifest {
+        attributes 'Main-Class': 'org.example.Main'
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task runJar(type: Exec) {
+    group = "Execution"
+    description = "Run the output executable jar with ExecTask"
+    commandLine "java", "-jar", "build/libs/myname.jar"
+}
+runJar.dependsOn(customFatJar)
+
+test {
+    useJUnitPlatform()
+}
